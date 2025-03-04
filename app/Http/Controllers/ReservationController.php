@@ -27,7 +27,7 @@ class ReservationController extends Controller
     {
         $user = auth()->user();
         try {
-            $reservation = $this->reservationService->createReservation($user, $request->book_id);
+            $reservation = $this->reservationService->createReservation($user, $request);
 
             return Response::successJson($reservation, 201);
         } catch (\Exception $e) {

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
             $table->foreignId('book_copy_id')->nullable()->constrained()->onDelete('cascade');
             $table->enum('status', ['pending', 'active', 'completed', 'canceled']);
+            $table->date('return_date')->nullable();
             $table->timestamps();
         });
     }

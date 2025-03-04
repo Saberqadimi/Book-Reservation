@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('membership_type', ['regular', 'vip'])->default('regular');
             $table->integer('score')->default(100);
+            $table->integer('late_returns_count')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

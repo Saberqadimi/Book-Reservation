@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Observers\ReservationObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+#[ObservedBy([ReservationObserver::class])]
 class Reservation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'book_id' ,'book_copy_id', 'status'];
+    protected $fillable = ['user_id', 'book_id' ,'book_copy_id', 'status' , 'return_date'];
+
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

@@ -22,7 +22,8 @@ class ReserveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'book_id' => 'required|exists:books,id'
+            'book_id' => 'required|exists:books,id',
+            'return_date' => 'nullable|date|after_or_equal:today'
         ];
     }
 }

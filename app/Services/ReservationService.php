@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Http\Resources\ReservationResource;
 use App\Models\BookCopy;
 use App\Models\Reservation;
+use App\ReservationTimePenalty;
+use Carbon\Carbon;
 use Exception as ExceptionAlias;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -30,18 +32,23 @@ class ReservationService
     /**
      * @throws ExceptionAlias
      */
-    public function createReservation($user, $bookId)
+    public function createReservation($user, $request)
     {
         $this->validateUser($user);
 
-        return DB::transaction(function () use ($user, $bookId) {
-            $bookCopy = $this->getAvailableBookCopy($bookId);
+        return DB::transaction(function () use ($user, $request) {
+            $bookCopy = $this->getAvailableBookCopy($request->book_id);
+            $status = $bookCopy ? 'active' : 'pending';
+            $returnDate = $request->has('return_date')
+                ? Carbon::parse($request->return_date)->toDateString()
+                : now()->addDays(ReservationTimePenalty::GRACE_PERIOD->value)->toDateString();
 
             $reservation = Reservation::create([
                 'user_id' => $user->id,
-                'book_id' => $bookId,
+                'book_id' => $request->book_id,
                 'book_copy_id' => $bookCopy?->id,
-                'status' => $bookCopy ? 'active' : 'pending'
+                'status' => $status,
+                'return_date' => $bookCopy ? $returnDate : null
             ]);
 
             if ($bookCopy) {
@@ -93,6 +100,7 @@ class ReservationService
             ->where('book_id', $bookCopy->book_id)
             ->leftJoin('users', 'reservations.user_id', '=', 'users.id')
             ->orderByRaw("CASE WHEN users.membership_type = 'vip' THEN 1 ELSE 2 END")
+            ->orderBy('reservations.created_at')
             ->select('reservations.*')
             ->first();
 
