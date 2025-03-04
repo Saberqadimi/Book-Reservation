@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('membership_type', ['regular', 'vip'])->default('regular');
+            $table->integer('score')->default(100);
             $table->rememberToken();
             $table->timestamps();
         });

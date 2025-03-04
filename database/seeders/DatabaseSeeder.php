@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Book;
+use App\Models\BookCopy;
 use App\Models\User;
+
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,11 +16,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $book = Book::create([
+            'title' => 'صدسال تنهایی ',
+            'author' => ' گابریل گارسیا مارکز',
+            'genre' => 'رئالیسم جادویی'
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        BookCopy::create([
+            'book_id' => $book->id,
+            'status' => 'available',
+            'repair_history' => []
+        ]);
+
+        User::create([
+            'name' => 'Saber',
+            'email' => 'user@example.com',
+            'membership_type' => 'regular',
+            'password' => bcrypt('12345678'),
+            'score' => 100
         ]);
     }
 }
