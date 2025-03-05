@@ -10,7 +10,14 @@ class BookCopy extends Model
 {
     use HasFactory , SoftDeletes;
 
-    protected $fillable = ['book_id', 'status', 'repair_history'];
+    protected $fillable = [
+        'book_id',
+        'status',
+        'edition',
+        'published_year',
+        'location',
+        'repair_history'
+    ];
 
     protected $casts = [
         'repair_history' => 'array',

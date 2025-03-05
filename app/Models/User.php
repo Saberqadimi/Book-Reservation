@@ -59,8 +59,4 @@ class User extends Authenticatable
         return $this->roles->contains('name', $role);
     }
 
-    public function scopeIsAdmin(): bool
-    {
-        return $this->hasRole('admin');
-    }
 }
