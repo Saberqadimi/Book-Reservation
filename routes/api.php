@@ -11,10 +11,20 @@ Route::controller(\App\Http\Controllers\Auth\AuthController::class)->group(funct
     Route::post('/login', 'login');
     Route::post('/register', 'register');
 });
+
 #reservation
-Route::middleware('auth:sanctum')->controller(\App\Http\Controllers\ReservationController::class)
-    ->group(function () {
-        Route::get('reservations', 'index');
-        Route::post('reservations', 'store');
-        Route::post('reservations/{reservation}/complete', 'complete');
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+
+    Route::controller(\App\Http\Controllers\ReservationController::class)
+        ->group(function () {
+            Route::get('reservations', 'index');
+            Route::post('reservations', 'store');
+            Route::post('reservations/{reservation}/complete', 'complete');
+        });
+
+    Route::controller(\App\Http\Controllers\BookController::class)->group(function () {
+        Route::get('books', 'index');
+        Route::post('books', 'newOrUpdate');
+        Route::delete('books/{book}', 'destroy');
     });
+});

@@ -8,6 +8,7 @@ use App\Models\User;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -28,12 +29,15 @@ class DatabaseSeeder extends Seeder
             'repair_history' => []
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => 'Saber',
-            'email' => 'user@example.com',
-            'membership_type' => 'regular',
+            'email' => 'qadimi74@gmail.com',
+            'membership_type' => 'vip',
             'password' => bcrypt('12345678'),
             'score' => 100
         ]);
+        $role = Role::create(['name' => 'writer']);
+
+        $user->assignRole($role->name);
     }
 }
