@@ -5,11 +5,13 @@ namespace App\Listeners;
 use App\Events\BookReturned;
 use App\Jobs\CheckUserReservation;
 use App\Models\Reservation;
+use App\Notifications\ReservationWaitingList;
 use App\ReservationTimePenalty;
 use App\Services\WaitingListService;
 use App\Traits\UserReservation;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class NotifyNextUser implements ShouldQueue
 {
@@ -40,7 +42,7 @@ class NotifyNextUser implements ShouldQueue
                 }
             } catch (\Exception $e) {
                 Log::error("Error during reservation for user {$nextUser->user_id} on book {$bookCopy->book_id}: " . $e->getMessage());
-                $this->notificationService->sendNotification($nextUser->user);
+                Notification::send($nextUser, new ReservationWaitingList($bookCopy));
                 CheckUserReservation::dispatch($nextUser->user, $bookCopy->book_id)->delay(now()->addHours(24));
             }
         }
