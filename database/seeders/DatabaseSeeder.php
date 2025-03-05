@@ -8,6 +8,7 @@ use App\Models\User;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
@@ -36,8 +37,7 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('12345678'),
             'score' => 100
         ]);
-        $role = Role::create(['name' => 'writer']);
-
-        $user->assignRole($role->name);
+        $role = Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        DB::table('model_has_roles')->insert(['role_id' => $role->id, 'model_type' => User::class, 'model_id' => $user->id]);
     }
 }

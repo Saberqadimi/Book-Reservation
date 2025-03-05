@@ -12,16 +12,15 @@ Route::controller(\App\Http\Controllers\Auth\AuthController::class)->group(funct
     Route::post('/register', 'register');
 });
 
-#reservation
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-
+    #reservation
     Route::controller(\App\Http\Controllers\ReservationController::class)
         ->group(function () {
             Route::get('reservations', 'index');
             Route::post('reservations', 'store');
             Route::post('reservations/{reservation}/complete', 'complete');
         });
-
+    #book
     Route::controller(\App\Http\Controllers\BookController::class)->group(function () {
         Route::get('books', 'index');
         Route::post('books', 'newOrUpdate');
