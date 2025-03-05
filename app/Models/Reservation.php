@@ -38,4 +38,14 @@ class Reservation extends Model
             $q->where('title', 'LIKE', "%{$search}%");
         });
     }
+
+    public function scopeRoleCheck($query)
+    {
+        $user = auth()->user();
+        if ($user->hasRole('admin')) {
+            return $query;
+        }
+
+        return $query->where('user_id', $user->id);
+    }
 }

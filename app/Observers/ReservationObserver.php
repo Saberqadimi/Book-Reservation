@@ -7,6 +7,7 @@ use App\Models\Reservation;
 use App\Strategies\Penalty\PenaltyContext;
 use App\Strategies\Penalty\PenaltyService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class ReservationObserver
 {
@@ -17,15 +18,20 @@ class ReservationObserver
         $this->penaltyService = $penaltyService;
     }
 
+    public function created(Reservation $reservation)
+    {
+        Cache::tags(['reserved_books'])->flush();
+    }
+
     public function updated(Reservation $reservation)
     {
         if ($reservation->isDirty('status') && $reservation->status === 'completed') {
+            Cache::tags(['reserved_books'])->flush();
 
             event(new BookReturned($reservation->bookCopy));
             $this->penaltyService->checkInfoAndApplyPenalty($reservation);
         }
     }
-
 
 
 }

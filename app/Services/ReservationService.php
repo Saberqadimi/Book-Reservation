@@ -9,6 +9,7 @@ use App\ReservationTimePenalty;
 use App\Traits\UserReservation;
 use Carbon\Carbon;
 use Exception as ExceptionAlias;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -28,17 +29,20 @@ class ReservationService
 
     public function list()
     {
-        return new ReservationResource(
-            QueryBuilder::for(Reservation::class)
-                ->with(['bookCopy.book', 'user'])
-                ->allowedFilters([
-                    AllowedFilter::scope('user'),
-                    AllowedFilter::scope('book'),
-                    AllowedFilter::exact('status'),
-                ])
-                ->latest()
-                ->paginate(request('per_page', 12))
-        );
+        return Cache::remember('reserved_books', 600, function () {
+            return new ReservationResource(
+                QueryBuilder::for(Reservation::class)
+                    ->with(['bookCopy.book', 'user'])
+                    ->allowedFilters([
+                        AllowedFilter::scope('user'),
+                        AllowedFilter::scope('book'),
+                        AllowedFilter::exact('status'),
+                    ])
+                    ->roleCheck()
+                    ->latest()
+                    ->paginate(request('per_page', 12))
+            );
+        });
     }
 
     /**

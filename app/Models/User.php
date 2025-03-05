@@ -5,7 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -47,6 +49,24 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            DB::transaction(function () use ($user) {
+                $role = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'api']);
+                static::created(function ($user) use ($role) {
+                    DB::table('model_has_roles')->updateOrInsert([
+                        'role_id' => $role->id,
+                        'model_type' => self::class,
+                        'model_id' => $user->id
+                    ]);
+                });
+            });
+        });
     }
 
     public function reservations(): \Illuminate\Database\Eloquent\Relations\HasMany
