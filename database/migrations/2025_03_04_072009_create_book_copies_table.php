@@ -14,7 +14,11 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['available', 'reserved', 'damaged']);
+            $table->string('edition')->nullable();
+            $table->year('published_year')->nullable();
+            $table->string('location')->nullable();
             $table->json('repair_history')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

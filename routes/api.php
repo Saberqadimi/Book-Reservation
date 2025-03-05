@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,4 +27,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::post('books', 'newOrUpdate');
         Route::delete('books/{book}', 'destroy');
     });
+    #bookCopies
+    Route::apiResource('book-copies', \App\Http\Controllers\BookCopyController::class)->only(['index', 'store', 'destroy', 'update']);
 });

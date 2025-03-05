@@ -8,23 +8,28 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class BookService
 {
-    private $bookResource;
-
     public function list()
     {
-        $this->bookResource = new BookResource(
+        return new BookResource(
             QueryBuilder::for(Book::class)
                 ->with('copies')
+                ->allowedFilters('title', 'id', 'author')
                 ->latest()
                 ->paginate(request()->per_page ?? 10)
         );
-        return $this->bookResource;
     }
 
     public function newOrUpdate($request)
     {
-        return Book::query()->updateOrCreate([$request->title], [$request->author, $request->genre]);
+        return Book::updateOrCreate(
+            ['title' => $request->title],
+            [
+                'author' => $request->author,
+                'genre' => $request->genre
+            ]
+        );
     }
+
 
     public function delete($book)
     {
