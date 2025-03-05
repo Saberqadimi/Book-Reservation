@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ReserveRequest;
 use App\Models\Reservation;
-use App\Models\User;
 use App\Services\ReservationService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 class ReservationController extends Controller
@@ -28,7 +26,6 @@ class ReservationController extends Controller
         $user = auth()->user();
         try {
             $reservation = $this->reservationService->createReservation($user, $request);
-
             return Response::successJson($reservation, 201);
         } catch (\Exception $e) {
 

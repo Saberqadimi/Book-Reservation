@@ -20,18 +20,13 @@ class CustomeResponseServiceProvider extends ServiceProvider
         Response::macro('successJson', function ($data, $statusCode = 200) {
             return response()->json([
                 'content' => $data,
-                'errorCode' => '0',
             ], $statusCode);
         });
 
-        Response::macro('errorJson', function ($errorCode, $statusCode = 400, $message = null) {
-            $response = [
-                'errorCode' => $errorCode,
-            ];
-            if (!empty($message)) {
-                $response['message'] = $message;
-            }
-            return response()->json($response, $statusCode);
+
+        Response::macro('errorJson', function ($message , $statusCode = 400) {
+
+            return response()->json($message, $statusCode);
         });
     }
 }

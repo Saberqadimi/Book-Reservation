@@ -6,14 +6,26 @@ use App\Http\Resources\ReservationResource;
 use App\Models\BookCopy;
 use App\Models\Reservation;
 use App\ReservationTimePenalty;
+use App\Traits\UserReservation;
 use Carbon\Carbon;
 use Exception as ExceptionAlias;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ReservationService
 {
+    use UserReservation;
+
+    const ADD_IN_WAITING_LIST = "هیچ نسخه ای از کتاب موجود نبود شما به لیست انتظار برای کتاب مورد نظر اضافه شدین.";
+    private WaitingListService $waitingListService;
+
+    public function __construct(WaitingListService $waitingListService)
+    {
+        $this->waitingListService = $waitingListService;
+    }
+
     public function list()
     {
         return new ReservationResource(
@@ -34,28 +46,19 @@ class ReservationService
      */
     public function createReservation($user, $request)
     {
-        $this->validateUser($user);
-
         return DB::transaction(function () use ($user, $request) {
             $bookCopy = $this->getAvailableBookCopy($request->book_id);
-            $status = $bookCopy ? 'active' : 'pending';
+            if (!$bookCopy) {
+                $this->waitingListService->addToWaitingList($user, $request->book_id);
+                return Response::successJson(static::ADD_IN_WAITING_LIST, 404);
+            }
+
+            $bookCopy->update(['status' => 'reserved']);
             $returnDate = $request->has('return_date')
                 ? Carbon::parse($request->return_date)->toDateString()
                 : now()->addDays(ReservationTimePenalty::GRACE_PERIOD->value)->toDateString();
 
-            $reservation = Reservation::create([
-                'user_id' => $user->id,
-                'book_id' => $request->book_id,
-                'book_copy_id' => $bookCopy?->id,
-                'status' => $status,
-                'return_date' => $bookCopy ? $returnDate : null
-            ]);
-
-            if ($bookCopy) {
-                $bookCopy->update(['status' => 'reserved']);
-            }
-
-            return $reservation;
+            return $this->manualReserve($user, $bookCopy->book_id, $bookCopy->id, $returnDate);
         });
     }
 
@@ -69,15 +72,7 @@ class ReservationService
             }
 
             $this->markReservationAsCompleted($reservation, $bookCopy);
-            $this->assignBookToNextReservation($bookCopy);
         });
-    }
-
-    private function validateUser($user)
-    {
-        if ($user->score < 50) {
-            throw new ExceptionAlias("کاربر امتیاز کافی برای رزرو ندارد.");
-        }
     }
 
     private function getAvailableBookCopy($bookId)
@@ -93,23 +88,4 @@ class ReservationService
         $reservation->update(['status' => 'completed']);
     }
 
-    private function assignBookToNextReservation(BookCopy $bookCopy)
-    {
-        $nextReservation = Reservation::whereNull('book_copy_id')
-            ->where('status', 'pending')
-            ->where('book_id', $bookCopy->book_id)
-            ->leftJoin('users', 'reservations.user_id', '=', 'users.id')
-            ->orderByRaw("CASE WHEN users.membership_type = 'vip' THEN 1 ELSE 2 END")
-            ->orderBy('reservations.created_at')
-            ->select('reservations.*')
-            ->first();
-
-        if ($nextReservation) {
-            $nextReservation->update([
-                'book_copy_id' => $bookCopy->id,
-                'status' => 'active'
-            ]);
-            $bookCopy->update(['status' => 'reserved']);
-        }
-    }
 }
