@@ -24,6 +24,7 @@ class BookService
 
     public function newOrUpdate($request)
     {
+        Cache::tags(['books'])->flush();
         return Book::updateOrCreate(
             ['title' => $request->title],
             [

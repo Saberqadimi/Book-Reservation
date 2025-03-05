@@ -9,6 +9,7 @@ use Illuminate\Queue\SerializesModels;
 class BookReturned
 {
     use Dispatchable, SerializesModels;
+    public BookCopy $bookCopy;
 
     public function __construct(BookCopy $bookCopy)
     {

@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'qadimi74@gmail.com',
             'membership_type' => 'vip',
             'password' => bcrypt('12345678'),
-            'score' => 100
+            'score' => 150
         ]);
 
         $role = Role::create(['name' => 'admin', 'guard_name' => 'api']);

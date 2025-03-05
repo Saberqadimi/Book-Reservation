@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Response;
 
 class ReservationController extends Controller
 {
+    const RESERVE_COMPLETE = 'رزرو تکمیل شد';
     protected ReservationService $reservationService;
 
     public function __construct(ReservationService $reservationService)
@@ -37,9 +38,9 @@ class ReservationController extends Controller
     {
         try {
             $this->reservationService->completeReservation($reservation);
-            return response()->json(['message' => 'رزرو تکمیل شد']);
+            return Response::successJson($reservation, 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 400);
+            return Response::errorJson($e->getMessage(), 400);
         }
     }
 }

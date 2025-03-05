@@ -35,15 +35,15 @@ class NotifyNextUser implements ShouldQueue
             try {
                 $returnDate = now()->addDays(ReservationTimePenalty::GRACE_PERIOD->value)->toDateString();
                 $reservation = $this->manualReserve($nextUser->user, $bookCopy->book_id, $bookCopy->id, $returnDate);
-
                 if ($reservation instanceof Reservation) {
                     $bookCopy->update(['status' => 'reserved']);
                     $this->waitingListService->removeFromWaitingList($nextUser->user, $bookCopy->book_id);
                 }
             } catch (\Exception $e) {
                 Log::error("Error during reservation for user {$nextUser->user_id} on book {$bookCopy->book_id}: " . $e->getMessage());
-                Notification::send($nextUser, new ReservationWaitingList($bookCopy));
-                CheckUserReservation::dispatch($nextUser->user, $bookCopy->book_id)->delay(now()->addHours(24));
+                Notification::send($nextUser->user, new ReservationWaitingList($bookCopy));
+                //add delay for 24 o'clock check user reservation after user was in waitingList
+                CheckUserReservation::dispatch($nextUser->user, $bookCopy->book_id);//->delay(now()->addHours(24));
             }
         }
     }
