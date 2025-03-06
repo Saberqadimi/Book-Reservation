@@ -83,6 +83,7 @@ class ReservationService
     {
         return BookCopy::where('book_id', $bookId)
             ->where('status', 'available')
+            ->lockForUpdate()
             ->first();
     }
 
